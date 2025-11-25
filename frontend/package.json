@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run clean && npm run build:elm && npm run build:ports && npm run build:copy",
     "clean": "rm -rf dist && mkdir -p dist",
-    "build:elm": "elm make src/Main.elm --output=dist/elm.js --optimize",
+    "build:elm": "npx elm make src/Main.elm --output=dist/elm.js --optimize",
     "build:ports": "rollup -c rollup.config.js",
     "build:copy": "cp index.html event_ticketing.json dist/"
   },
