@@ -1,6 +1,6 @@
 # Project Description
 
-**Deployed Frontend URL:** LINK
+**Deployed Frontend URL:** [LINK](https://event-ticketing-solana.vercel.app/)
 
 **Solana Program ID:** 5wkLPJVMaiemo3Nn5QdAgdifjZig3DWUR9pxAGAeCXZJ
 
