@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend",
+  "devCommand": "cd frontend && python3 -m http.server 3000",
+  "installCommand": "cd frontend && npm install"
+}
