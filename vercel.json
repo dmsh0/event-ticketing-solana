@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "cd frontend && npm ci && npm run build && cd .. && cp -r frontend/dist public",
   "outputDirectory": "public",
-  "installCommand": "cd frontend && npm install",
   "framework": null
 }
