@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm ci && npm run build && cd .. && mkdir -p public && cp -r frontend/dist/* public/",
-    "vercel-build": "cd frontend && npm ci && npm run build && cd .. && mkdir -p public && cp -r frontend/dist/* public/"
+    "build": "cd frontend && npm ci && npm run build && cd .. && mkdir -p public && cp -r frontend/dist/* public/ && ls -la public",
+    "vercel-build": "cd frontend && npm ci && npm run build && cd .. && mkdir -p public && cp -r frontend/dist/* public/ && ls -la public"
   }
 }
