@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "npm install",
+  "outputDirectory": "public",
+  "installCommand": "echo 'No install needed'",
   "framework": null
 }
