@@ -10,6 +10,7 @@ elm.js
 target/
 dist/
 build/
+public/
 
 # Dependencies
 node_modules/
