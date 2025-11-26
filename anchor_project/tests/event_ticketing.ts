@@ -119,6 +119,101 @@ describe("event_ticketing", () => {
   });
 
   // ============================================================================
+  // TEST GROUP: register_organizer instruction
+  // ============================================================================
+  describe("register_organizer", () => {
+    /**
+     * Derives the Organizer Registry PDA address
+     * Seeds: ["organizer", organizer_pubkey]
+     */
+    function getOrganizerPda(organizer: PublicKey): [PublicKey, number] {
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from("organizer"), organizer.toBuffer()],
+        program.programId
+      );
+    }
+
+    // HAPPY PATH: Successfully register an organizer
+    it("Successfully registers an organizer", async () => {
+      const [organizerPda] = getOrganizerPda(eventAuthority.publicKey);
+
+      // Call the register_organizer instruction
+      const tx = await program.methods
+        .registerOrganizer()
+        .accounts({
+          organizerRegistry: organizerPda,
+          organizer: eventAuthority.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([eventAuthority])
+        .rpc();
+
+      console.log("Organizer registered:", tx);
+
+      // Fetch the created OrganizerRegistry account
+      const organizerAccount = await program.account.organizerRegistry.fetch(
+        organizerPda
+      );
+
+      // ASSERTIONS: Verify the account was created with correct data
+      expect(organizerAccount.organizer.toString()).to.equal(
+        eventAuthority.publicKey.toString()
+      );
+      expect(organizerAccount.registeredAt.toNumber()).to.be.greaterThan(0);
+    });
+
+    // UNHAPPY PATH: Try to register the same organizer twice
+    it("Fails to register organizer twice", async () => {
+      const [organizerPda] = getOrganizerPda(eventAuthority.publicKey);
+
+      try {
+        // Try to register the same organizer again (should fail)
+        await program.methods
+          .registerOrganizer()
+          .accounts({
+            organizerRegistry: organizerPda,
+            organizer: eventAuthority.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([eventAuthority])
+          .rpc();
+
+        // If we get here, the test should fail
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        // Expected to fail because account already exists
+        expect(error).to.exist;
+        console.log("Expected error: Organizer already registered");
+      }
+    });
+
+    // UNHAPPY PATH: Different user can register as organizer
+    it("Successfully registers a different organizer", async () => {
+      const [buyer1OrganizerPda] = getOrganizerPda(buyer1.publicKey);
+
+      // buyer1 can register as their own organizer
+      await program.methods
+        .registerOrganizer()
+        .accounts({
+          organizerRegistry: buyer1OrganizerPda,
+          organizer: buyer1.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([buyer1])
+        .rpc();
+
+      // Fetch and verify
+      const organizerAccount = await program.account.organizerRegistry.fetch(
+        buyer1OrganizerPda
+      );
+
+      expect(organizerAccount.organizer.toString()).to.equal(
+        buyer1.publicKey.toString()
+      );
+    });
+  });
+
+  // ============================================================================
   // TEST GROUP: initialize_event instruction
   // ============================================================================
   describe("initialize_event", () => {
@@ -378,13 +473,46 @@ describe("event_ticketing", () => {
         .signers([eventAuthority])
         .rpc();
 
-      // Manually cancel the event by modifying the account
-      // NOTE: In a real scenario, you'd have a cancel_event instruction
-      // For this test, we'll create a new canceled event in a separate test file
-      // For now, we'll skip this test as it requires a cancel instruction
-      // which isn't in the spec
+      // Cancel the event using the cancel_event instruction
+      await program.methods
+        .cancelEvent()
+        .accounts({
+          event: canceledEventPda,
+          eventAuthority: eventAuthority.publicKey,
+        })
+        .signers([eventAuthority])
+        .rpc();
 
-      // Instead, let's test with a different scenario
+      // Verify the event is canceled
+      const eventAccount = await program.account.event.fetch(canceledEventPda);
+      expect(eventAccount.canceled).to.be.true;
+
+      // Now try to mint a ticket for the canceled event
+      const [ticketPda] = getTicketPda(canceledEventPda, 0);
+      const [vaultPda] = getVaultPda(canceledEventPda);
+
+      const testBuyer = Keypair.generate();
+      await airdrop(testBuyer.publicKey, 10);
+
+      try {
+        await program.methods
+          .mintTicket()
+          .accounts({
+            event: canceledEventPda,
+            ticket: ticketPda,
+            vault: vaultPda,
+            buyer: testBuyer.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([testBuyer])
+          .rpc();
+
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        // Expected to fail with EventCanceled error
+        expect(error.toString()).to.include("EventCanceled");
+        console.log("Expected error: Cannot mint ticket for canceled event");
+      }
     });
   });
 
