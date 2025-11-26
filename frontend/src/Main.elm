@@ -214,8 +214,7 @@ type alias Ticket =
 {-| Form data for creating a new event
 -}
 type alias CreateEventForm =
-    { eventId : String
-    , name : String
+    { name : String
     , date : String
     , price : String
     , supply : String
@@ -234,7 +233,7 @@ init _ =
       , message = ""
       , transferRecipients = []
       , checkInTicketAddress = ""
-      , createEventForm = { eventId = "", name = "", date = "", price = "", supply = "" }
+      , createEventForm = { name = "", date = "", price = "", supply = "" }
       }
     , Cmd.none
     )
@@ -365,9 +364,6 @@ update msg model =
 
                 updatedForm =
                     case field of
-                        "eventId" ->
-                            { form | eventId = value }
-
                         "name" ->
                             { form | name = value }
 
@@ -393,8 +389,7 @@ update msg model =
             ( { model | message = "Creating event..." }
             , createEventPort
                 (E.object
-                    [ ( "eventId", E.string form.eventId )
-                    , ( "name", E.string form.name )
+                    [ ( "name", E.string form.name )
                     , ( "date", E.string form.date )
                     , ( "price", E.string form.price )
                     , ( "supply", E.string form.supply )
@@ -407,7 +402,7 @@ update msg model =
                 Ok signature ->
                     ( { model
                         | message = "Event created! TX: " ++ signature
-                        , createEventForm = { eventId = "", name = "", date = "", price = "", supply = "" }
+                        , createEventForm = { name = "", date = "", price = "", supply = "" }
                         , page = HomePage
                       }
                     , loadAllEventsPort ()
@@ -875,16 +870,6 @@ viewCreateEventPage model =
                 else
                     div [ class "create-event-form" ]
                         [ div [ class "form-field" ]
-                            [ label [] [ text "Event ID (unique number):" ]
-                            , input
-                                [ type_ "text"
-                                , placeholder "e.g., 1"
-                                , value model.createEventForm.eventId
-                                , onInput (UpdateEventFormField "eventId")
-                                ]
-                                []
-                            ]
-                        , div [ class "form-field" ]
                             [ label [] [ text "Event Name:" ]
                             , input
                                 [ type_ "text"
@@ -925,7 +910,7 @@ viewCreateEventPage model =
                                 []
                             ]
                         , button [ onClick CreateEvent ] [ text "Create Event" ]
-                        , p [ class "help-text" ] [ text "Note: Make sure the Event ID is unique!" ]
+                        , p [ class "help-text" ] [ text "Note: Event ID will be generated automatically based on timestamp." ]
                         ]
         ]
 

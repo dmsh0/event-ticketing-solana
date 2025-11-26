@@ -42,7 +42,7 @@ function getEventPda(programId, eventAuthority, eventId) {
       new PublicKey(eventAuthority).toBuffer(),
       eventIdBuffer,
     ],
-    programId
+    programId,
   );
 
   return pda;
@@ -58,7 +58,7 @@ function getTicketPda(programId, eventPda, ticketId) {
 
   const [pda] = PublicKey.findProgramAddressSync(
     [Buffer.from("ticket"), new PublicKey(eventPda).toBuffer(), ticketIdBuffer],
-    programId
+    programId,
   );
 
   return pda;
@@ -71,7 +71,7 @@ function getTicketPda(programId, eventPda, ticketId) {
 function getVaultPda(programId, eventPda) {
   const [pda] = PublicKey.findProgramAddressSync(
     [Buffer.from("vault"), new PublicKey(eventPda).toBuffer()],
-    programId
+    programId,
   );
 
   return pda;
@@ -84,7 +84,7 @@ function getVaultPda(programId, eventPda) {
 function getOrganizerPda(programId, walletPubkey) {
   const [pda] = PublicKey.findProgramAddressSync(
     [Buffer.from("organizer"), new PublicKey(walletPubkey).toBuffer()],
-    programId
+    programId,
   );
 
   return pda;
@@ -149,7 +149,7 @@ async function connectWallet(app) {
     // Provider connects to the blockchain
     const connection = new anchor.web3.Connection(
       "https://api.devnet.solana.com",
-      "confirmed"
+      "confirmed",
     );
 
     provider = new anchor.AnchorProvider(connection, wallet, {
@@ -207,10 +207,10 @@ async function connectWallet(app) {
       console.error("Error stack:", programError.stack);
       // Don't fail the wallet connection, but log clearly
       console.warn(
-        "⚠️ Program initialization failed, but wallet is connected."
+        "⚠️ Program initialization failed, but wallet is connected.",
       );
       console.warn(
-        "⚠️ Transaction features will not work until program is initialized."
+        "⚠️ Transaction features will not work until program is initialized.",
       );
       // Don't throw - let wallet stay connected
     }
@@ -349,7 +349,7 @@ async function loadMyTickets(app) {
 
     console.log(
       "Loading tickets for wallet:",
-      provider.wallet.publicKey.toString()
+      provider.wallet.publicKey.toString(),
     );
 
     // Fetch all program accounts manually
@@ -572,10 +572,13 @@ async function createEvent(app, data) {
       throw new Error("Program not initialized. Please reconnect your wallet.");
     }
 
-    const { eventId, name, date, price, supply } = data;
+    const { name, date, price, supply } = data;
+
+    // Generate a unique event ID based on current timestamp
+    // Using milliseconds since epoch, then taking last 9 digits to keep it within u32 range
+    const eventIdNum = Math.floor(Date.now() / 1000) % 1000000000;
 
     // Parse inputs
-    const eventIdNum = parseInt(eventId);
     // Price input is in SOL, convert to lamports
     const priceInSol = parseFloat(price);
     const priceNum = new anchor.BN(Math.floor(priceInSol * LAMPORTS_PER_SOL));
@@ -592,7 +595,7 @@ async function createEvent(app, data) {
     const eventPda = getEventPda(
       program.programId,
       provider.wallet.publicKey,
-      eventIdNum
+      eventIdNum,
     );
 
     console.log("Creating event:", {
@@ -675,13 +678,13 @@ async function loadAllEvents(app) {
         // Manual decode based on Event struct
         let offset = 0;
         const eventAuthority = new PublicKey(
-          accountData.slice(offset, offset + 32)
+          accountData.slice(offset, offset + 32),
         );
         offset += 32;
 
         const price = new anchor.BN(
           accountData.slice(offset, offset + 8),
-          "le"
+          "le",
         );
         offset += 8;
 
@@ -805,7 +808,7 @@ async function checkOrganizerStatus(app) {
 
     const organizerPda = getOrganizerPda(
       program.programId,
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     console.log("Checking organizer status for PDA:", organizerPda.toString());
@@ -846,7 +849,7 @@ async function registerOrganizer(app) {
 
     const organizerPda = getOrganizerPda(
       program.programId,
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     console.log("Registering organizer with PDA:", organizerPda.toString());
@@ -891,7 +894,7 @@ window.testProgramStatus = function () {
     console.log("Program ID:", program.programId?.toString());
     console.log(
       "Program methods available:",
-      Object.keys(program.methods || {})
+      Object.keys(program.methods || {}),
     );
   }
   if (provider) {
