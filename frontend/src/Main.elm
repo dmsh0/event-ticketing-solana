@@ -864,7 +864,7 @@ viewBecomeOrganizerPage model =
                             ]
                         , div [ class "registration-info" ]
                             [ strong [] [ text "💡 Registration Details:" ]
-                            , p [] [ text "Registration is free and only requires a small transaction fee (~0.001 SOL for rent, which is refundable if you close your organizer account)." ]
+                            , p [] [ text "Registration requires a small one-time fee (~0.001 SOL) to create your organizer account on-chain. This covers the blockchain storage cost." ]
                             ]
                         , button [ onClick RegisterOrganizer, class "accent" ] [ text "Register as Organizer" ]
                         ]
