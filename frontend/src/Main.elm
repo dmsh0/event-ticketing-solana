@@ -1067,8 +1067,6 @@ viewEventManagementPage : Model -> Html Msg
 viewEventManagementPage model =
     div [ class "page event-management-page" ]
         [ h2 [] [ text "Event Management" ]
-        , p [ class "help-text" ]
-            [ text "Manage your events and issue refunds." ]
         , case model.wallet of
             Nothing ->
                 p [ class "help-text" ] [ text "Please connect your wallet first." ]
@@ -1079,8 +1077,7 @@ viewEventManagementPage model =
 
                 else
                     div []
-                        [ h3 [] [ text "Your Events" ]
-                        , p [ class "help-text" ] [ text "Manage tickets and issue refunds for your events." ]
+                        [ p [ class "help-text" ] [ text "Manage tickets and issue refunds for your events." ]
                         , if List.isEmpty model.events then
                             p [] [ text "No events found." ]
 
